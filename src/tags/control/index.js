@@ -25,6 +25,7 @@ import { PolygonLabelsModel } from './PolygonLabels';
 import { PolygonModel } from './Polygon';
 import { RectangleLabelsModel } from './RectangleLabels';
 import { RectangleModel } from './Rectangle';
+import { LineModel } from './Line';
 
 import { RelationsModel } from './Relations';
 import { RelationModel } from './Relation';
@@ -39,13 +40,11 @@ export {
   ShortcutModel,
   TaxonomyModel,
   TextAreaModel,
-
   HyperTextLabelsModel,
   LabelsModel,
   ParagraphLabelsModel,
   TimeSeriesLabelsModel,
   VideoRectangleModel,
-
   BrushLabelsModel,
   BrushModel,
   EllipseLabelsModel,
@@ -57,7 +56,7 @@ export {
   PolygonModel,
   RectangleLabelsModel,
   RectangleModel,
-
+  LineModel,
   RelationsModel,
-  RelationModel
+  RelationModel,
 };

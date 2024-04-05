@@ -6,6 +6,7 @@ import { Erase } from './Erase';
 import { KeyPoint } from './KeyPoint';
 import { Polygon } from './Polygon';
 import { Rect, Rect3Point } from './Rect';
+import { Line } from './Line';
 import { Ellipse } from './Ellipse';
 import { Zoom } from './Zoom';
 import { Rotate } from './Rotate';
@@ -14,4 +15,19 @@ import { Contrast } from './Contrast';
 import { MagicWand } from './MagicWand';
 import { Selection } from './Selection';
 
-export { Brush, Erase, KeyPoint, Polygon, Rect, Rect3Point, Ellipse, Brightness, Contrast, Rotate, Zoom, MagicWand, Selection };
+export {
+  Brush,
+  Erase,
+  KeyPoint,
+  Polygon,
+  Rect,
+  Rect3Point,
+  Ellipse,
+  Brightness,
+  Contrast,
+  Rotate,
+  Zoom,
+  MagicWand,
+  Selection,
+  Line,
+};

@@ -37,7 +37,6 @@ export const ImageSelection = types.model({
     },
     get bbox() {
       const { start, end } = self;
-
       return self.isActive ? {
         left: Math.min(start.x, end.x),
         top: Math.min(start.y, end.y),

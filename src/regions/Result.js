@@ -37,6 +37,7 @@ const Result = types
       'hypertextlabels',
       'paragraphlabels',
       'rectangle',
+      'line',
       'keypoint',
       'polygon',
       'brush',

@@ -11,6 +11,7 @@ import { EllipseRegionModel } from '../../../regions/EllipseRegion';
 import { KeyPointRegionModel } from '../../../regions/KeyPointRegion';
 import { PolygonRegionModel } from '../../../regions/PolygonRegion';
 import { RectRegionModel } from '../../../regions/RectRegion';
+import { LineRegionModel } from '../../../regions/LineRegion';
 import * as Tools from '../../../tools';
 import ToolsManager from '../../../tools/Manager';
 import { parseValue } from '../../../utils/data';
@@ -129,6 +130,7 @@ const TagAttrs = types.model({
 });
 
 const IMAGE_CONSTANTS = {
+  lineModel: 'LineModel',
   rectangleModel: 'RectangleModel',
   rectangleLabelsModel: 'RectangleLabelsModel',
   ellipseModel: 'EllipseModel',
@@ -166,10 +168,17 @@ const Model = types.model({
    */
   mode: types.optional(types.enumeration(['drawing', 'viewing', 'brush', 'eraser']), 'viewing'),
 
-  regions: types.array(
-    types.union(BrushRegionModel, RectRegionModel, EllipseRegionModel, PolygonRegionModel, KeyPointRegionModel),
-    [],
-  ),
+    regions: types.array(
+      types.union(
+        BrushRegionModel,
+        LineRegionModel,
+        RectRegionModel,
+        EllipseRegionModel,
+        PolygonRegionModel,
+        KeyPointRegionModel,
+      ),
+      [],
+    ),
 
   drawingRegion: types.optional(DrawingRegion, null),
   selectionArea: types.optional(ImageSelection, { start: null, end: null }),

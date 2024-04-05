@@ -12,11 +12,13 @@ import { EllipseRegionModel, HtxEllipse } from './EllipseRegion';
 import { HtxTextAreaRegion, TextAreaRegionModel } from './TextAreaRegion';
 import { RichTextRegionModel } from './RichTextRegion';
 import { VideoRectangleRegionModel } from './VideoRectangleRegion';
+import { HtxLine, LineRegionModel } from './LineRegion';
 
 const AllRegionsType = types.union(
   AudioRegionModel,
   BrushRegionModel,
   EllipseRegionModel,
+  LineRegionModel,
   TimeSeriesRegionModel,
   KeyPointRegionModel,
   PolygonRegionModel,
@@ -33,11 +35,13 @@ export {
   AudioRegionModel,
   BrushRegionModel,
   EllipseRegionModel,
+  LineRegionModel,
   HtxBrush,
   HtxEllipse,
   HtxKeyPoint,
   HtxPolygon,
   HtxRectangle,
+  HtxLine,
   HtxTextAreaRegion,
   RichTextRegionModel,
   ParagraphsRegionModel,
@@ -48,5 +52,5 @@ export {
   PolygonRegionModel,
   RectRegionModel,
   TextAreaRegionModel,
-  VideoRectangleRegionModel
+  VideoRectangleRegionModel,
 };
