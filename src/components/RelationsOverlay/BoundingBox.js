@@ -97,6 +97,7 @@ const _detect = region => {
       return regionBbox;
     }
     case 'rectangleregion':
+    case 'lineregion':
     case 'ellipseregion':
     case 'polygonregion':
     case 'keypointregion':

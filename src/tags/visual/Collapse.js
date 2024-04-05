@@ -41,6 +41,7 @@ const PanelModel = types.model({
     'rating',
     'ranker',
     'rectangle',
+    'line',
     'ellipse',
     'polygon',
     'keypoint',

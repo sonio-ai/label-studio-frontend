@@ -339,6 +339,131 @@ const TwoPointsDrawingTool = DrawingTool.named('TwoPointsDrawingTool')
     };
   });
 
+const LineDrawingTool = DrawingTool.named('LineDrawingTool')
+  .views((self) => ({
+    get defaultDimensions() {
+      return {
+        width: self.MIN_SIZE.X,
+        height: self.MIN_SIZE.Y,
+      };
+    },
+  }))
+  .actions((self) => {
+    const DEFAULT_MODE = 0;
+    const DRAG_MODE = 1;
+    const TWO_CLICKS_MODE = 2;
+    let currentMode = DEFAULT_MODE;
+    let modeAfterMouseMove = DEFAULT_MODE;
+    let startPoint = null;
+    let endPoint = { x: 0, y: 0 };
+    const Super = {
+      finishDrawing: self.finishDrawing,
+    };
+
+    return {
+      updateDraw: throttle(function (x, y) {
+        if (currentMode === DEFAULT_MODE) return;
+        self.draw(x, y);
+      }, 48), // 3 frames, optimized enough and not laggy yet
+
+      draw(x, y) {
+        const shape = self.getCurrentArea();
+
+        if (!shape) return;
+        const maxStageWidth = isFF(FF_DEV_3793) ? RELATIVE_STAGE_WIDTH : self.obj.stageWidth;
+        const maxStageHeight = isFF(FF_DEV_3793) ? RELATIVE_STAGE_HEIGHT : self.obj.stageHeight;
+
+        // let { x1, y1, x2, y2 } = Utils.Image.reverseCoordinates({ x: shape.startX, y: shape.startY }, { x, y });
+
+        let { x1, y1, x2, y2 } = { x1: shape.startX, y1: shape.startY, x2: x, y2: y };
+
+        x1 = Math.max(0, x1);
+        y1 = Math.max(0, y1);
+        x2 = Math.min(maxStageWidth, x2);
+        y2 = Math.min(maxStageHeight, y2);
+
+        let [distX, distY] = [x2 - x1, y2 - y1];
+
+        shape.setPositionInternal(x1, y1, distX, distY, shape.rotation, x2, y2);
+      },
+
+      finishDrawing(x, y) {
+        startPoint = null;
+        Super.finishDrawing(x, y);
+        currentMode = DEFAULT_MODE;
+        modeAfterMouseMove = DEFAULT_MODE;
+      },
+
+      mousedownEv(_, [x, y]) {
+        if (!self.canStartDrawing()) return;
+        startPoint = { x, y };
+        if (currentMode === DEFAULT_MODE) {
+          modeAfterMouseMove = DRAG_MODE;
+        }
+      },
+
+      mousemoveEv(_, [x, y]) {
+        if (currentMode === DEFAULT_MODE && startPoint) {
+          currentMode = modeAfterMouseMove;
+          if ([DRAG_MODE, TWO_CLICKS_MODE].includes(currentMode)) {
+            self.startDrawing(startPoint.x, startPoint.y);
+            if (!self.isDrawing) {
+              currentMode = DEFAULT_MODE;
+              return;
+            }
+          }
+        }
+        if (!self.isDrawing) return;
+        if ([DRAG_MODE, TWO_CLICKS_MODE].includes(currentMode)) {
+          self.updateDraw(x, y);
+        }
+      },
+
+      mouseupEv(_, [x, y]) {
+        if (currentMode !== DRAG_MODE) return;
+        endPoint = { x, y };
+        if (!self.isDrawing) return;
+        self.draw(x, y);
+        self.finishDrawing(x, y);
+      },
+
+      clickEv(_, [x, y]) {
+        if (!self.canStartDrawing()) return;
+        // @todo: here is a potential problem with endPoint
+        // it may be incorrect due to it may be not set at this moment
+        if (startPoint && endPoint) return;
+        if (currentMode === DEFAULT_MODE) {
+          modeAfterMouseMove = TWO_CLICKS_MODE;
+        } else if (self.isDrawing && currentMode === TWO_CLICKS_MODE) {
+          self.draw(x, y);
+          self.finishDrawing(x, y);
+          currentMode = DEFAULT_MODE;
+        }
+      },
+
+      dblclickEv(_, [x, y]) {
+        if (!self.canStartDrawing()) return;
+
+        let dX = self.defaultDimensions.width;
+        let dY = self.defaultDimensions.height;
+
+        if (isFF(FF_DEV_3793)) {
+          dX = self.obj.canvasToInternalX(dX);
+          dY = self.obj.canvasToInternalY(dY);
+        }
+
+        if (currentMode === DEFAULT_MODE) {
+          self.startDrawing(x, y);
+          if (!self.isDrawing) return;
+          x += dX;
+          y += dY;
+          self.draw(x, y);
+          self.finishDrawing(x, y);
+        }
+      },
+    };
+  });
+
 const MultipleClicksDrawingTool = DrawingTool.named('MultipleClicksMixin')
   .views(() => ({
     canStart() {
@@ -602,4 +727,4 @@ const ThreePointsDrawingTool = DrawingTool.named('ThreePointsDrawingTool')
     };
   });
 
-export { DrawingTool, TwoPointsDrawingTool, MultipleClicksDrawingTool, ThreePointsDrawingTool };
+export { DrawingTool, TwoPointsDrawingTool, MultipleClicksDrawingTool, ThreePointsDrawingTool, LineDrawingTool };

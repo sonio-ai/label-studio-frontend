@@ -22,7 +22,7 @@ export default {
 
   // when region gets highlighted styling
   HIGHLIGHTED_STROKE_COLOR: 'red',
-  HIGHLIGHTED_STROKE_WIDTH: 2,
+  HIGHLIGHTED_STROKE_WIDTH: 4,
   HIGHLIGHTED_CSS_BORDER: '1px dashed #00aeff',
 
   // when using dynamic suggestions

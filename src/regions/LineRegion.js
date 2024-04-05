@@ -1,6 +1,6 @@
 import { getRoot, isAlive, types } from 'mobx-state-tree';
 import React, { useContext } from 'react';
-import { Rect } from 'react-konva';
+import { Line, Rect } from 'react-konva';
 import { ImageViewContext } from '../components/ImageView/ImageViewContext';
 import { LabelOnRect } from '../components/ImageView/LabelOnRegion';
 import Constants from '../core/Constants';
@@ -20,129 +20,15 @@ import { EditableRegion } from './EditableRegion';
 import { RegionWrapper } from './RegionWrapper';
 import { RELATIVE_STAGE_HEIGHT, RELATIVE_STAGE_WIDTH } from '../components/ImageView/Image';
 
-const RectRegionAbsoluteCoordsDEV3793 = types
-  .model({
-    coordstype: types.optional(types.enumeration(['px', 'perc']), 'perc'),
-  })
-  .volatile(() => ({
-    relativeX: 0,
-    relativeY: 0,
-
-    relativeWidth: 0,
-    relativeHeight: 0,
-  }))
-  .actions(self => ({
-    afterCreate() {
-      switch (self.coordstype) {
-        case 'perc': {
-          self.relativeX = self.x;
-          self.relativeY = self.y;
-          self.relativeWidth = self.width;
-          self.relativeHeight = self.height;
-          break;
-        }
-        case 'px': {
-          const { stageWidth, stageHeight } = self.parent;
-
-          if (stageWidth && stageHeight) {
-            self.setPosition(self.x, self.y, self.width, self.height, self.rotation);
-          }
-          break;
-        }
-      }
-      self.checkSizes();
-      self.updateAppearenceFromState();
-    },
-    setPosition(x, y, width, height, rotation) {
-      self.x = x;
-      self.y = y;
-      self.width = width;
-      self.height = height;
-
-      self.relativeX = (x / self.parent?.stageWidth) * RELATIVE_STAGE_WIDTH;
-      self.relativeY = (y / self.parent?.stageHeight) * RELATIVE_STAGE_HEIGHT;
-
-      self.relativeWidth = (width / self.parent?.stageWidth) * RELATIVE_STAGE_WIDTH;
-      self.relativeHeight = (height / self.parent?.stageHeight) * RELATIVE_STAGE_HEIGHT;
-
-      self.rotation = (rotation + 360) % 360;
-    },
-    setPositionInternal(x, y, width, height, rotation) {
-      return self.setPosition(x, y, width, height, rotation);
-    },
-    updateImageSize(wp, hp, sw, sh) {
-      if (self.coordstype === 'px') {
-        self.x = (sw * self.relativeX) / RELATIVE_STAGE_WIDTH;
-        self.y = (sh * self.relativeY) / RELATIVE_STAGE_HEIGHT;
-        self.width = (sw * self.relativeWidth) / RELATIVE_STAGE_WIDTH;
-        self.height = (sh * self.relativeHeight) / RELATIVE_STAGE_HEIGHT;
-      } else if (self.coordstype === 'perc') {
-        self.x = (sw * self.x) / RELATIVE_STAGE_WIDTH;
-        self.y = (sh * self.y) / RELATIVE_STAGE_HEIGHT;
-        self.width = (sw * self.width) / RELATIVE_STAGE_WIDTH;
-        self.height = (sh * self.height) / RELATIVE_STAGE_HEIGHT;
-        self.coordstype = 'px';
-      }
-    },
-
-    draw(x, y, points) {
-      const oldHeight = self.height;
-
-      if (points.length === 1) {
-        self.width = self.getDistanceBetweenPoints({ x, y }, self);
-        self.rotation = self.rotationAtCreation = Math.atan2(y - self.y, x - self.x) * (180 / Math.PI);
-      } else if (points.length === 2) {
-        const { y: firstPointY, x: firstPointX } = points[0];
-        const { y: secondPointY, x: secondPointX } = points[1];
-
-        if (self.isAboveTheLine(points[0], points[1], { x, y })) {
-          self.x = secondPointX;
-          self.y = secondPointY;
-          self.rotation = self.rotationAtCreation + 180;
-        } else {
-          self.x = firstPointX;
-          self.y = firstPointY;
-          self.rotation = self.rotationAtCreation;
-        }
-        self.height = self.getHeightOnPerpendicular(points[0], points[1], { x, y });
-      }
-
-      self.setPosition(self.x, self.y, self.width, self.height, self.rotation);
-
-      const areaBBoxCoords = self?.bboxCoords;
-
-      if (
-        areaBBoxCoords?.left < 0 ||
-        areaBBoxCoords?.top < 0 ||
-        areaBBoxCoords?.right > self.parent.stageWidth ||
-        areaBBoxCoords?.bottom > self.parent.stageHeight
-      ) {
-        self.height = oldHeight;
-      }
-    },
-    getHeightOnPerpendicular(pointA, pointB, cursor) {
-      const dx1 = pointB.x - pointA.x;
-      const dy1 = pointB.y - pointA.y;
-      const dy2 = pointB.y - cursor.y;
-      const dx2 = dy2 / dx1 * dy1; // dx2 / dy1 = dy2 / dx1 (triangle is rotated)
-      const dx3 = cursor.x - pointB.x - dx2;
-      const d2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-      const d3 = dx3 / d2 * dx2; // dx3 / d2 = d3 / dx2 (triangle is inverted)
-      const h = d2 + d3;
-
-      return Math.abs(h);
-    },
-  }));
-
 /**
- * Rectangle object for Bounding Box
+ * Line object for Bounding Box
  *
  */
 const Model = types
   .model({
     id: types.optional(types.identifier, guidGenerator),
     pid: types.optional(types.string, guidGenerator),
-    type: 'rectangleregion',
+    type: 'lineregion',
     object: types.late(() => types.reference(ImageModel)),
 
     x: types.number,
@@ -153,6 +39,9 @@ const Model = types
 
     rotation: 0,
     rotationAtCreation: 0,
+
+    x2: types.number,
+    y2: types.number,
   })
   .volatile(() => ({
     startX: 0,
@@ -181,6 +70,8 @@ const Model = types
       { property: 'width', label: 'W' },
       { property: 'height', label: 'H' },
       { property: 'rotation', label: 'icon:angle' },
+      { property: 'x2', label: 'X2' },
+      { property: 'y2', label: 'Y2' },
     ],
   }))
   .volatile(() => {
@@ -191,7 +82,7 @@ const Model = types
       supportsScale: true,
     };
   })
-  .views(self => ({
+  .views((self) => ({
     get store() {
       return getRoot(self);
     },
@@ -222,8 +113,14 @@ const Model = types
     get canvasHeight() {
       return isFF(FF_DEV_3793) ? self.parent?.internalToCanvasY(self.height) : self.height;
     },
+    get canvasX2() {
+      return isFF(FF_DEV_3793) ? self.parent?.internalToCanvasX(self.x2) : self.x2;
+    },
+    get canvasY2() {
+      return isFF(FF_DEV_3793) ? self.parent?.internalToCanvasY(self.y2) : self.y2;
+    },
   }))
-  .actions(self => ({
+  .actions((self) => ({
     afterCreate() {
       self.startX = self.x;
       self.startY = self.y;
@@ -248,7 +145,7 @@ const Model = types
     },
 
     isAboveTheLine(a, b, c) {
-      return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) < 0;
+      return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) < 0;
     },
 
     draw(x, y, points) {
@@ -256,14 +153,20 @@ const Model = types
       const canvasX = self.parent.internalToCanvasX(x);
       const canvasY = self.parent.internalToCanvasY(y);
 
+      console.log('draw', x, y, points);
+
       if (points.length === 1) {
-        const canvasWidth = self.getDistanceBetweenPoints({ x: canvasX, y: canvasY }, {
-          x: self.canvasX,
-          y: self.canvasY,
-        });
+        const canvasWidth = self.getDistanceBetweenPoints(
+          { x: canvasX, y: canvasY },
+          {
+            x: self.canvasX,
+            y: self.canvasY,
+          },
+        );
 
         self.width = self.parent.canvasToInternalX(canvasWidth);
-        self.rotation = self.rotationAtCreation = Math.atan2(canvasY - self.canvasY, canvasX - self.canvasX) * (180 / Math.PI);
+        self.rotation = self.rotationAtCreation =
+          Math.atan2(canvasY - self.canvasY, canvasX - self.canvasX) * (180 / Math.PI);
       } else if (points.length === 2) {
         const canvasPoints = points.map(({ x, y }) => ({
           x: self.parent.internalToCanvasX(x),
@@ -272,15 +175,13 @@ const Model = types
         const { y: firstPointY, x: firstPointX } = points[0];
         const { y: secondPointY, x: secondPointX } = points[1];
 
-        if (self.isAboveTheLine(canvasPoints[0], canvasPoints[1], { x: canvasX, y: canvasY })) {
-          self.x = secondPointX;
-          self.y = secondPointY;
-          self.rotation = self.rotationAtCreation + 180;
-        } else {
-          self.x = firstPointX;
-          self.y = firstPointY;
-          self.rotation = self.rotationAtCreation;
-        }
+        self.x = firstPointX;
+        self.y = firstPointY;
+        self.rotation = self.rotationAtCreation;
+
+        self.x2 = secondPointX;
+        self.y2 = secondPointY;
+
         const canvasHeight = self.getHeightOnPerpendicular(canvasPoints[0], canvasPoints[1], {
           x: canvasX,
           y: canvasY,
@@ -288,10 +189,9 @@ const Model = types
 
         self.height = self.parent.canvasToInternalY(canvasHeight);
       }
-      self.setPositionInternal(self.x, self.y, self.width, self.height, self.rotation);
+      self.setPositionInternal(self.x, self.y, self.width, self.height, self.rotation, self.x2, self.y2);
 
       const areaBBoxCoords = self?.bboxCoords;
-
       if (
         areaBBoxCoords?.left < 0 ||
         areaBBoxCoords?.top < 0 ||
@@ -302,24 +202,13 @@ const Model = types
       }
     },
 
-    // @todo not used
-    coordsInside(x, y) {
-      // check if x and y are inside the rectangle
-      const rx = self.x;
-      const ry = self.y;
-      const rw = self.width * (self.scaleX || 1);
-      const rh = self.height * (self.scaleY || 1);
-
-      if (x > rx && x < rx + rw && y > ry && y < ry + rh) return true;
-
-      return false;
-    },
-
-    setPositionInternal(x, y, width, height, rotation) {
+    setPositionInternal(x, y, width, height, rotation, x2, y2) {
       self.x = x;
       self.y = y;
       self.width = width;
       self.height = height;
+      self.x2 = x2;
+      self.y2 = y2;
       self.rotation = (rotation + 360) % 360;
     },
 
@@ -331,13 +220,15 @@ const Model = types
      * @param {number} height
      * @param {number} rotation
      */
-    setPosition(x, y, width, height, rotation) {
+    setPosition(x, y, width, height, rotation, x2, y2) {
       self.setPositionInternal(
         self.parent.canvasToInternalX(x),
         self.parent.canvasToInternalY(y),
         self.parent.canvasToInternalX(width),
         self.parent.canvasToInternalY(height),
         rotation,
+        self.parent.canvasToInternalX(x2),
+        self.parent.canvasToInternalY(y2),
       );
     },
 
@@ -370,46 +261,50 @@ const Model = types
      *     "rectanglelabels": ["Car"]
      *   }
      * }
-     * @typedef {Object} RectRegionResult
+     * @typedef {Object} LineRegionResult
      * @property {number} original_width width of the original image (px)
      * @property {number} original_height height of the original image (px)
      * @property {number} image_rotation rotation degree of the image (deg)
      * @property {Object} value
      * @property {number} value.x x coordinate of the top left corner before rotation (0-100)
      * @property {number} value.y y coordinate of the top left corner before rotation (0-100)
+     * @property {number} value.x2 x coordinate of the top left corner before rotation (0-100)
+     * @property {number} value.y2 y coordinate of the top left corner before rotation (0-100)
      * @property {number} value.width width of the bounding box (0-100)
      * @property {number} value.height height of the bounding box (0-100)
      * @property {number} value.rotation rotation degree of the bounding box (deg)
      */
 
     /**
-     * @return {RectRegionResult}
+     * @return {LineRegionResult}
      */
     serialize() {
       const value = {
-        x: (self.parent.stageWidth > 1 && !isFF(FF_DEV_3793)) ? self.convertXToPerc(self.x) : self.x,
-        y: (self.parent.stageWidth > 1 && !isFF(FF_DEV_3793)) ? self.convertYToPerc(self.y) : self.y,
-        width: (self.parent.stageWidth > 1 && !isFF(FF_DEV_3793)) ? self.convertHDimensionToPerc(self.width) : self.width,
-        height: (self.parent.stageWidth > 1 && !isFF(FF_DEV_3793)) ? self.convertVDimensionToPerc(self.height) : self.height,
+        x: self.parent.stageWidth > 1 && !isFF(FF_DEV_3793) ? self.convertXToPerc(self.x) : self.x,
+        y: self.parent.stageWidth > 1 && !isFF(FF_DEV_3793) ? self.convertYToPerc(self.y) : self.y,
+        width: self.parent.stageWidth > 1 && !isFF(FF_DEV_3793) ? self.convertHDimensionToPerc(self.width) : self.width,
+        height:
+          self.parent.stageWidth > 1 && !isFF(FF_DEV_3793) ? self.convertVDimensionToPerc(self.height) : self.height,
         rotation: self.rotation,
+        x2: self.parent.stageWidth > 1 && !isFF(FF_DEV_3793) ? self.convertXToPerc(self.x2) : self.x2,
+        y2: self.parent.stageWidth > 1 && !isFF(FF_DEV_3793) ? self.convertYToPerc(self.y2) : self.y2,
       };
 
       return self.parent.createSerializedResult(self, value);
     },
   }));
 
-const RectRegionModel = types.compose(
-  'RectRegionModel',
+const LineRegionModel = types.compose(
+  'LineRegionModel',
   RegionsMixin,
   NormalizationMixin,
   AreaMixin,
   KonvaRegionMixin,
   EditableRegion,
   Model,
-  ...(isFF(FF_DEV_3793) ? [] : [RectRegionAbsoluteCoordsDEV3793]),
 );
 
-const HtxRectangleView = ({ item, setShapeRef }) => {
+const HtxLineView = ({ item, setShapeRef }) => {
   const { store } = item;
 
   const { suggestion } = useContext(ImageViewContext) ?? {};
@@ -417,6 +312,8 @@ const HtxRectangleView = ({ item, setShapeRef }) => {
   const stage = item.parent?.stageRef;
 
   const eventHandlers = {};
+
+  console.log('HtxLineView', !suggestion && !item.isReadOnly());
 
   if (!item.parent) return null;
   if (!item.inViewPort) return null;
@@ -429,13 +326,16 @@ const HtxRectangleView = ({ item, setShapeRef }) => {
     };
     eventHandlers.onTransformEnd = (e) => {
       const t = e.target;
+      const [x, y, x2, y2] = t.getAttr('points');
 
       item.setPosition(
-        t.getAttr('x'),
-        t.getAttr('y'),
+        x * t.getAttr('scaleX'), 
+        y * t.getAttr('scaleY'),
         t.getAttr('width') * t.getAttr('scaleX'),
         t.getAttr('height') * t.getAttr('scaleY'),
         t.getAttr('rotation'),
+        x2 * t.getAttr('scaleX'),
+        y2 * t.getAttr('scaleY'),
       );
 
       t.setAttr('scaleX', 1);
@@ -445,6 +345,7 @@ const HtxRectangleView = ({ item, setShapeRef }) => {
     };
 
     eventHandlers.onDragStart = (e) => {
+      console.log('onDragStart');
       if (item.parent.getSkipInteractions()) {
         e.currentTarget.stopDrag(e.evt);
         return;
@@ -454,13 +355,16 @@ const HtxRectangleView = ({ item, setShapeRef }) => {
 
     eventHandlers.onDragEnd = (e) => {
       const t = e.target;
+      const [x, y, x2, y2] = t.getAttr('points');
 
       item.setPosition(
-        t.getAttr('x'),
-        t.getAttr('y'),
+        x, 
+        y,
         t.getAttr('width'),
         t.getAttr('height'),
         t.getAttr('rotation'),
+        x2,
+        y2,
       );
       item.setScale(t.getAttr('scaleX'), t.getAttr('scaleY'));
       item.annotation.history.unfreeze(item.id);
@@ -468,21 +372,23 @@ const HtxRectangleView = ({ item, setShapeRef }) => {
       item.notifyDrawingFinished();
     };
 
-    eventHandlers.dragBoundFunc = createDragBoundFunc(item, {
-      x: item.x - item.bboxCoords.left,
-      y: item.y - item.bboxCoords.top,
-    });
+    // not needed for the Line
+    // eventHandlers.dragBoundFunc = createDragBoundFunc(item, {
+    //   x: item.x - item.bboxCoords.left,
+    //   y: item.y - item.bboxCoords.top,
+    // });
   }
+  const canvasX2 = item.canvasX2;
+  const canvasY2 = item.canvasY2;
+
+  console.log('points', [item.canvasX, item.canvasY, canvasX2, canvasY2]);
 
   return (
     <RegionWrapper item={item}>
-      <Rect
-        x={item.canvasX}
-        y={item.canvasY}
-        ref={node => setShapeRef(node)}
-        width={item.canvasWidth}
-        height={item.canvasHeight}
-        fill={regionStyles.fillColor}
+      <Line
+        points={[item.canvasX, item.canvasY, canvasX2, canvasY2]}
+        ref={(node) => setShapeRef(node)}
+        fill={'#FFFF00'}
         stroke={regionStyles.strokeColor}
         strokeWidth={regionStyles.strokeWidth}
         strokeScaleEnabled={false}
@@ -512,7 +418,7 @@ const HtxRectangleView = ({ item, setShapeRef }) => {
             item.setHighlight(false);
           }
         }}
-        onClick={e => {
+        onClick={(e) => {
           if (item.parent.getSkipInteractions()) return;
           if (store.annotationStore.selected.relationMode) {
             stage.container().style.cursor = Constants.DEFAULT_CURSOR;
@@ -523,14 +429,17 @@ const HtxRectangleView = ({ item, setShapeRef }) => {
         }}
         listening={!suggestion && !item.annotation?.isDrawing}
       />
-      <LabelOnRect item={item} color={regionStyles.strokeColor} strokewidth={regionStyles.strokeWidth} />
     </RegionWrapper>
   );
 };
 
-const HtxRectangle = AliveRegion(HtxRectangleView);
+const HtxLine = AliveRegion(HtxLineView);
 
-Registry.addTag('rectangleregion', RectRegionModel, HtxRectangle);
-// Registry.addRegionType(RectRegionModel, 'image');
+Registry.addTag('lineregion', LineRegionModel, HtxLine);
+Registry.addRegionType(LineRegionModel, 'image', (value) => {
+  console.log('--------------------------------------------', value);
+  return typeof value.x2 !== 'undefined';
+  // return value;
+});
 
-export { RectRegionModel, HtxRectangle };
+export { LineRegionModel, HtxLine };

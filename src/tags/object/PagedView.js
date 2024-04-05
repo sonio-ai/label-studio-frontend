@@ -28,6 +28,7 @@ const Model = types.model({
     'rating',
     'ranker',
     'rectangle',
+    'line',
     'ellipse',
     'polygon',
     'keypoint',

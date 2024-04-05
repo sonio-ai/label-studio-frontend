@@ -16,6 +16,8 @@ const obtainWatcher = node => {
       return DOMWatcher;
     case 'rectangleregion':
       return createPropertyWatcher(['x', 'y', 'width', 'height', 'hidden', parentImagePropsWatch]);
+    case 'lineregion':
+      return createPropertyWatcher(['x', 'y', 'width', 'height', 'x2', 'y2', 'hidden', parentImagePropsWatch]);
     case 'ellipseregion':
       return createPropertyWatcher(['x', 'y', 'radiusX', 'radiusY', 'rotation', 'hidden', parentImagePropsWatch]);
     case 'polygonregion':
