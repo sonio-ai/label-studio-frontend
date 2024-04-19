@@ -30,7 +30,7 @@
     "build-notsourcemap": "GENERATE_SOURCEMAP=false yarn run build",
     "build:final": "BUILD_NO_CHUNKS=true yarn run build",
     "build:no-hash": "BUILD_NO_HASH=true BUILD_NO_CHUNKS=true yarn run build",
-    "build:module": "BUILD_MODULE=true yarn run build:no-hash",
+    "build:module": "BUILD_MODULE=true yarn run build:no-hash && cp -R /Users/benoit/src/label-studio-frontend/build/static/* /Users/benoit/src/sonio-label-studio/label_studio/frontend/dist/lsf",
     "build": "webpack",
     "watch": "webpack --watch",
     "copy-examples": "bash scripts/copy.sh",

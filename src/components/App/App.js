@@ -48,6 +48,7 @@ import { SidebarTabs } from '../SidebarTabs/SidebarTabs';
 import { SidePanels } from '../SidePanels/SidePanels';
 import { SideTabsPanels } from '../SidePanels/TabPanels/SideTabsPanels';
 import { TopBar } from '../TopBar/TopBar';
+import TaskContext from '../../core/taskContext';
 
 /**
  * Styles
@@ -231,75 +232,77 @@ class App extends Component {
         ref={isFF(FF_LSDV_4620_3_ML) ? reactCleaner(this) : null}
       >
         <Settings store={store} />
-        <Provider store={store}>
-          {newUIEnabled ? (
-            <InstructionsModal
-              visible={store.showingDescription}
-              onCancel={() => store.toggleDescription()}
-              title="Labeling Instructions"
-            >
-              {store.description}
-            </InstructionsModal>
-          ) : (
-            <>
-              {store.showingDescription && (
-                <Segment>
-                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(store.description) }} />
-                </Segment>
-              )}
-            </>
-          )}
-
-          {isDefined(store) && store.hasInterface('topbar') && <TopBar store={store} />}
-          <Block
-            name="wrapper"
-            mod={{
-              viewAll: viewingAll,
-              bsp: settings.bottomSidePanel,
-              outliner: outlinerEnabled,
-              showingBottomBar: newUIEnabled,
-            }}
-          >
-            {outlinerEnabled ? (
-              newUIEnabled ? (
-                <SideTabsPanels
-                  panelsHidden={viewingAll}
-                  currentEntity={as.selectedHistory ?? as.selected}
-                  regions={as.selected.regionStore}
-                  showComments={store.hasInterface('annotations:comments')}
-                  focusTab={store.commentStore.tooltipMessage ? 'comments' : null}
-                >
-                  {mainContent}
-                  {store.hasInterface('topbar') && <BottomBar store={store} />}
-                </SideTabsPanels>
-              ) : (
-                <SidePanels
-                  panelsHidden={viewingAll}
-                  currentEntity={as.selectedHistory ?? as.selected}
-                  regions={as.selected.regionStore}
-                >
-                  {mainContent}
-                </SidePanels>
-              )
+        <TaskContext.Provider value={store.task}>
+          <Provider store={store}>
+            {newUIEnabled ? (
+              <InstructionsModal
+                visible={store.showingDescription}
+                onCancel={() => store.toggleDescription()}
+                title="Labeling Instructions"
+              >
+                {store.description}
+              </InstructionsModal>
             ) : (
               <>
-                {mainContent}
-
-                {viewingAll === false && (
-                  <Block name="menu" mod={{ bsp: settings.bottomSidePanel }}>
-                    {store.hasInterface('side-column') && (
-                      <SidebarTabs>
-                        <AnnotationTab store={store} />
-                      </SidebarTabs>
-                    )}
-                  </Block>
+                {store.showingDescription && (
+                  <Segment>
+                    <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(store.description) }} />
+                  </Segment>
                 )}
-
-                {newUIEnabled && store.hasInterface('topbar') && <BottomBar store={store} />}
               </>
             )}
-          </Block>
-        </Provider>
+
+            {isDefined(store) && store.hasInterface('topbar') && <TopBar store={store} />}
+            <Block
+              name="wrapper"
+              mod={{
+                viewAll: viewingAll,
+                bsp: settings.bottomSidePanel,
+                outliner: outlinerEnabled,
+                showingBottomBar: newUIEnabled,
+              }}
+            >
+              {outlinerEnabled ? (
+                newUIEnabled ? (
+                  <SideTabsPanels
+                    panelsHidden={viewingAll}
+                    currentEntity={as.selectedHistory ?? as.selected}
+                    regions={as.selected.regionStore}
+                    showComments={store.hasInterface('annotations:comments')}
+                    focusTab={store.commentStore.tooltipMessage ? 'comments' : null}
+                  >
+                    {mainContent}
+                    {store.hasInterface('topbar') && <BottomBar store={store} />}
+                  </SideTabsPanels>
+                ) : (
+                  <SidePanels
+                    panelsHidden={viewingAll}
+                    currentEntity={as.selectedHistory ?? as.selected}
+                    regions={as.selected.regionStore}
+                  >
+                    {mainContent}
+                  </SidePanels>
+                )
+              ) : (
+                <>
+                  {mainContent}
+
+                  {viewingAll === false && (
+                    <Block name="menu" mod={{ bsp: settings.bottomSidePanel }}>
+                      {store.hasInterface('side-column') && (
+                        <SidebarTabs>
+                          <AnnotationTab store={store} />
+                        </SidebarTabs>
+                      )}
+                    </Block>
+                  )}
+
+                  {newUIEnabled && store.hasInterface('topbar') && <BottomBar store={store} />}
+                </>
+              )}
+            </Block>
+          </Provider>
+        </TaskContext.Provider>
         {store.hasInterface('debug') && <Debug store={store} />}
       </Block>
     );

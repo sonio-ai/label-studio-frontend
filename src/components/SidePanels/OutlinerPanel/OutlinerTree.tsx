@@ -230,7 +230,7 @@ const useDataTree = ({
               return [
                 index ? ', ' : null,
                 <Elem key={label.id} style={{ color }}>
-                  {label.value || 'No label'}
+                  {/* {label.value || 'No label'} */}
                 </Elem>,
               ];
             })}
@@ -436,7 +436,7 @@ const RootTitle: FC<any> = observer(({
       <Elem name="content">
         {!props.isGroup && <Elem name="index">{props.idx + 1}</Elem>}
         <Elem name="title">
-          {label}
+          {item?.sonioDistance.toFixed(1)}
           {item?.text && <Elem name="text">{item.text.replace(/\\n/g, '\n')}</Elem>}
           {item?.isDrawing && (
             <Elem tag="span" name="incomplete">
@@ -445,6 +445,7 @@ const RootTitle: FC<any> = observer(({
               </Tooltip>
             </Elem>
           )}
+           cm
         </Elem>
         <RegionControls
           hovered={hovered}

@@ -19,6 +19,7 @@ import { AliveRegion } from './AliveRegion';
 import { EditableRegion } from './EditableRegion';
 import { RegionWrapper } from './RegionWrapper';
 import { RELATIVE_STAGE_HEIGHT, RELATIVE_STAGE_WIDTH } from '../components/ImageView/Image';
+import TaskContext from '../core/taskContext';
 
 /**
  * Line object for Bounding Box
@@ -119,6 +120,13 @@ const Model = types
     get canvasY2() {
       return isFF(FF_DEV_3793) ? self.parent?.internalToCanvasY(self.y2) : self.y2;
     },
+
+    get sonioDistance() {
+      const taskData = JSON.parse(useContext(TaskContext).data);
+      console.log("hit")
+      console.log(taskData)
+      return Math.sqrt(((self.x2 - self.x)/100 * taskData.image_width )** 2 + ((self.y2 - self.y)/100 * taskData.image_height )** 2) * taskData.pixel_spacing;
+    }
   }))
   .actions((self) => ({
     afterCreate() {
@@ -313,7 +321,7 @@ const HtxLineView = ({ item, setShapeRef }) => {
 
   const eventHandlers = {};
 
-  console.log('HtxLineView', !suggestion && !item.isReadOnly());
+  // console.log('HtxLineView', !suggestion && !item.isReadOnly());
 
   if (!item.parent) return null;
   if (!item.inViewPort) return null;
@@ -380,8 +388,8 @@ const HtxLineView = ({ item, setShapeRef }) => {
   }
   const canvasX2 = item.canvasX2;
   const canvasY2 = item.canvasY2;
-
-  console.log('points', [item.canvasX, item.canvasY, canvasX2, canvasY2]);
+  
+  // console.log('points', [item.canvasX, item.canvasY, canvasX2, canvasY2]);
 
   return (
     <RegionWrapper item={item}>

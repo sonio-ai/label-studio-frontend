@@ -88,6 +88,10 @@ export const AreaMixinBase = types
       return self.labeling?.mainValue?.[0] || self.emptyLabel?._value;
     },
 
+    get sonio () {
+      return 42
+    }, 
+    
     get labels() {
       return Array.from(self.labeling?.mainValue ?? []);
     },
