@@ -28,6 +28,7 @@ import { RegionControlButton } from '../Components/RegionControlButton';
 import './TreeView.styl';
 import ResizeObserver from '../../../utils/resize-observer';
 import { EventDataNode, Key } from 'rc-tree/es/interface';
+import { TaskContext } from '../../../core/taskContext';
 
 const { localStorage } = window;
 const localStoreName = 'collapsed-label-pos';
@@ -415,6 +416,8 @@ const RootTitle: FC<any> = observer(({
 }) => {
   const hovered = item?.highlighted;
   const [collapsed, setCollapsed] = useState(false);
+  const taskContext = useContext(TaskContext);
+  const taskData = JSON.parse(taskContext.data);
 
   const controls = useMemo(() => {
     if (!isArea) return [];
@@ -436,7 +439,7 @@ const RootTitle: FC<any> = observer(({
       <Elem name="content">
         {!props.isGroup && <Elem name="index">{props.idx + 1}</Elem>}
         <Elem name="title">
-          {item?.sonioDistance.toFixed(1)}
+          {item?.sonioDistance(taskData).toFixed(1)}
           {item?.text && <Elem name="text">{item.text.replace(/\\n/g, '\n')}</Elem>}
           {item?.isDrawing && (
             <Elem tag="span" name="incomplete">
