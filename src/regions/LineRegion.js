@@ -123,8 +123,6 @@ const Model = types
 
     get sonioDistance() {
       const taskData = JSON.parse(useContext(TaskContext).data);
-      console.log("hit")
-      console.log(taskData)
       return Math.sqrt(((self.x2 - self.x)/100 * taskData.image_width )** 2 + ((self.y2 - self.y)/100 * taskData.image_height )** 2) * taskData.pixel_spacing;
     }
   }))

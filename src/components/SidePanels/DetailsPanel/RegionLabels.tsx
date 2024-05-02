@@ -8,7 +8,7 @@ export const RegionLabels: FC<{region: LSFRegion}> = observer(({ region }) => {
     .map((result: any) => result.selectedLabels || []);
   const labels: any[] = [].concat(...labelsInResults);
   
-  if (!labels.length) return <Block name="labels-list">{region?.sonioDistance.toFixed(1)} cm</Block>;
+  if (!labels.length) return <Block name="labels-list">{region?.sonioDistance.toFixed(1)} mm</Block>;
 
   return (
     <Block name="labels-list">

@@ -445,7 +445,7 @@ const RootTitle: FC<any> = observer(({
               </Tooltip>
             </Elem>
           )}
-           cm
+           mm
         </Elem>
         <RegionControls
           hovered={hovered}
