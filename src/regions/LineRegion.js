@@ -121,8 +121,8 @@ const Model = types
       return isFF(FF_DEV_3793) ? self.parent?.internalToCanvasY(self.y2) : self.y2;
     },
 
-    get sonioDistance() {
-      const taskData = JSON.parse(useContext(TaskContext).data);
+    sonioDistance: (taskData) => {
+      if (!taskData) return;
       return Math.sqrt(((self.x2 - self.x)/100 * taskData.image_width )** 2 + ((self.y2 - self.y)/100 * taskData.image_height )** 2) * taskData.pixel_spacing;
     }
   }))

@@ -1,6 +1,6 @@
 import { FC, useContext } from 'react';
 import { observer } from 'mobx-react';
-
+import { TaskContext } from '../../../taskContext';
 import { Block } from '../../../utils/bem';
 
 export const RegionLabels: FC<{region: LSFRegion}> = observer(({ region }) => {
@@ -8,7 +8,10 @@ export const RegionLabels: FC<{region: LSFRegion}> = observer(({ region }) => {
     .map((result: any) => result.selectedLabels || []);
   const labels: any[] = [].concat(...labelsInResults);
   
-  if (!labels.length) return <Block name="labels-list">{region?.sonioDistance.toFixed(1)} mm</Block>;
+  const taskContext = useContext(TaskContext);
+  const taskData = JSON.parse(taskContext.data);
+
+  if (!labels.length) return <Block name="labels-list">{region?.sonioDistance(taskData).toFixed(1)} mm</Block>;
 
   return (
     <Block name="labels-list">
