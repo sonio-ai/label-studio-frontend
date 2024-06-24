@@ -8,4 +8,6 @@ declare interface LSFResult {
 
 declare interface LSFRegion {
   results: LSFResult[];
+  labelings: any;
+  sonioDistance: any;
 }

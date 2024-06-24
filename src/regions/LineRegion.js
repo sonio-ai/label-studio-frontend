@@ -19,7 +19,6 @@ import { AliveRegion } from './AliveRegion';
 import { EditableRegion } from './EditableRegion';
 import { RegionWrapper } from './RegionWrapper';
 import { RELATIVE_STAGE_HEIGHT, RELATIVE_STAGE_WIDTH } from '../components/ImageView/Image';
-import TaskContext from '../core/taskContext';
 
 /**
  * Line object for Bounding Box
@@ -122,8 +121,9 @@ const Model = types
     },
 
     get sonioDistance() {
-      const taskData = JSON.parse(useContext(TaskContext).data);
-      return Math.sqrt(((self.x2 - self.x)/100 * taskData.image_width )** 2 + ((self.y2 - self.y)/100 * taskData.image_height )** 2) * taskData.pixel_spacing;
+      const taskStore = getRoot(self)?.task;
+      const taskData = taskStore?.data ? JSON.parse(taskStore.data) : false;
+      return !taskData ? 0 : Math.sqrt(((self.x2 - self.x)/100 * taskData.image_width )** 2 + ((self.y2 - self.y)/100 * taskData.image_height )** 2) * taskData.pixel_spacing;
     }
   }))
   .actions((self) => ({
