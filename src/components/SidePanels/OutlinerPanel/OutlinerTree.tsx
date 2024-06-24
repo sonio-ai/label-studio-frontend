@@ -436,7 +436,7 @@ const RootTitle: FC<any> = observer(({
       <Elem name="content">
         {!props.isGroup && <Elem name="index">{props.idx + 1}</Elem>}
         <Elem name="title">
-          {item?.sonioDistance.toFixed(1)}
+          {item?.sonioDistance?.toFixed(1)}
           {item?.text && <Elem name="text">{item.text.replace(/\\n/g, '\n')}</Elem>}
           {item?.isDrawing && (
             <Elem tag="span" name="incomplete">
