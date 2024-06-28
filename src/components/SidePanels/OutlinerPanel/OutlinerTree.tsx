@@ -431,12 +431,26 @@ const RootTitle: FC<any> = observer(({
     setCollapsed(!collapsed);
   }, [collapsed]);
 
+  const sonioDistance = item?.sonioDistance?.toFixed(1);
+  const sonioAngle = item?.sonioAngle !== false && !isNaN(item?.sonioAngle) ? Math.round(item?.sonioAngle?.toFixed(1) * 10) / 10 : false;
+
   return (
     <Block name="outliner-item">
       <Elem name="content">
         {!props.isGroup && <Elem name="index">{props.idx + 1}</Elem>}
         <Elem name="title">
-          {item?.sonioDistance?.toFixed(1)}
+          {!!sonioAngle ? (
+            <>
+              {sonioAngle} / {Math.round((180 - sonioAngle).toFixed(1) * 10) / 10} deg
+            </>
+          ) : (
+            !!sonioDistance && (
+              <>
+                {sonioDistance}
+                mm
+              </>
+            )
+          )}
           {item?.text && <Elem name="text">{item.text.replace(/\\n/g, '\n')}</Elem>}
           {item?.isDrawing && (
             <Elem tag="span" name="incomplete">
@@ -445,7 +459,6 @@ const RootTitle: FC<any> = observer(({
               </Tooltip>
             </Elem>
           )}
-           mm
         </Elem>
         <RegionControls
           hovered={hovered}

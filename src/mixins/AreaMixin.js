@@ -89,7 +89,7 @@ export const AreaMixinBase = types
     },
 
     get sonio () {
-      return 42
+      return self
     }, 
     
     get labels() {
@@ -173,11 +173,11 @@ export const AreaMixinBase = types
      * Remove region
      */
     deleteRegion() {
-      if (self.annotation.isReadOnly()) return;
+      if (self.annotation?.isReadOnly()) return;
       if (self.isReadOnly()) return;
-      if (self.selected) self.annotation.unselectAll(true);
+      if (self.selected) self.annotation?.unselectAll(true);
       if (self.destroyRegion) self.destroyRegion();
-      self.annotation.deleteRegion(self);
+      self.annotation?.deleteRegion(self);
     },
 
     addResult(r) {

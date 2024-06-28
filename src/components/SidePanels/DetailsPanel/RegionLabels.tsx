@@ -7,14 +7,21 @@ export const RegionLabels: FC<{region: LSFRegion}> = observer(({ region }) => {
   const labelsInResults = region.labelings
     .map((result: any) => result.selectedLabels || []);
   const labels: any[] = [].concat(...labelsInResults);
-  
+
   return (
     <Block name="labels-list">
       {!labels.length ? (
-        <>
-          {region?.sonioDistance?.toFixed(1)}
-          mm
-        </>
+        !!region?.sonioAngle ? (
+          <>
+            {Math.round(region?.sonioAngle?.toFixed(1) * 10) / 10}
+            deg
+          </>
+        ) : (
+          <>
+            {Math.round(region?.sonioDistance?.toFixed(1) * 10) / 10}
+            mm
+          </>
+        )
       ) : (
         labels.map((label, index) => {
           const color = label.background || '#000000';

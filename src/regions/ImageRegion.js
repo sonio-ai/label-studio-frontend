@@ -132,7 +132,7 @@ const RegionMixin = types
 
       self.annotation.relationStore.deleteNodeRelation(self);
 
-      if (self.type === 'polygonregion') {
+      if (['polygonregion', 'angleregion'].includes(self.type)) {
         self.destroyRegion();
       }
 

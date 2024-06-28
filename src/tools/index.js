@@ -7,6 +7,7 @@ import { KeyPoint } from './KeyPoint';
 import { Polygon } from './Polygon';
 import { Rect, Rect3Point } from './Rect';
 import { Line } from './Line';
+import { Angle } from './Angle';
 import { Ellipse } from './Ellipse';
 import { Zoom } from './Zoom';
 import { Rotate } from './Rotate';
@@ -30,4 +31,5 @@ export {
   MagicWand,
   Selection,
   Line,
+  Angle,
 };

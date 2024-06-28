@@ -664,6 +664,8 @@ export default observer(
         'RectangleTool-dynamic',
         'PolygonTool',
         'PolygonTool-dynamic',
+        'AngleTool',
+        'AngleTool-dynamic',
         'Rectangle3PointTool',
         'Rectangle3PointTool-dynamic',
       ].includes(selectedTool?.fullName);

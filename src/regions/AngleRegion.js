@@ -8,8 +8,8 @@ import NormalizationMixin from '../mixins/Normalization';
 import RegionsMixin from '../mixins/Regions';
 import Registry from '../core/Registry';
 import { ImageModel } from '../tags/object/Image';
-import { LabelOnPolygon } from '../components/ImageView/LabelOnRegion';
-import { PolygonPoint, PolygonPointView } from './PolygonPoint';
+import { LabelOnAngle } from '../components/ImageView/LabelOnRegion';
+import { AnglePoint, AnglePointView } from './AnglePoint';
 import { green } from '@ant-design/colors';
 import { guidGenerator } from '../core/Helpers';
 import { AreaMixin } from '../mixins/AreaMixin';
@@ -23,7 +23,7 @@ import { FF_DEV_2432, FF_DEV_3793, isFF } from '../utils/feature-flags';
 import { fixMobxObserve } from '../utils/utilities';
 import { RELATIVE_STAGE_HEIGHT, RELATIVE_STAGE_WIDTH } from '../components/ImageView/Image';
 
-const PolygonRegionAbsoluteCoordsDEV3793 = types
+const AngleRegionAbsoluteCoordsDEV3793 = types
   .model({
     coordstype: types.optional(types.enumeration(['px', 'perc']), 'perc'),
   })
@@ -54,10 +54,10 @@ const Model = types
   .model({
     id: types.optional(types.identifier, guidGenerator),
     pid: types.optional(types.string, guidGenerator),
-    type: 'polygonregion',
+    type: 'angleregion',
     object: types.late(() => types.reference(ImageModel)),
 
-    points: types.array(types.union(PolygonPoint, types.array(types.number)), []),
+    points: types.array(types.union(AnglePoint, types.array(types.number)), []),
     closed: true,
   })
   .volatile(() => ({
@@ -134,6 +134,7 @@ const Model = types
   .actions(self => {
     return {
       afterCreate() {
+        console.log('angle', 'afterCreate');
         if (!self.points.length) return;
         if (!self.points[0].id) {
           self.points = self.points.map(([x, y], index) => ({
@@ -151,7 +152,7 @@ const Model = types
 
       /**
        * @todo excess method; better to handle click only on start point
-       * Handler for mouse on start point of Polygon
+       * Handler for mouse on start point of Angle
        * @param {boolean} val
        */
       setMouseOverStartPoint(value) {
@@ -210,7 +211,7 @@ const Model = types
       },
 
       addPoint(x, y) {
-        console.log('poly', 'addpoint');
+        console.log('angle', 'addpoint');
         if (self.closed) return;
 
         const point = self.control?.getSnappedPoint({ x, y });
@@ -254,9 +255,10 @@ const Model = types
 
       _addPoint(x, y) {
         const firstPoint = self.points[0];
+        console.log('angle', '_addPoint');
 
         // This is mostly for "snap to pixel" mode,
-        // 'cause there is also an ability to close polygon by clicking on the first point precisely
+        // 'cause there is also an ability to close angle by clicking on the first point precisely
         if (self.parent.isSamePixel(firstPoint, { x, y })) {
           self.closePoly();
           return;
@@ -323,19 +325,19 @@ const Model = types
        *   "image_rotation": 0,
        *   "value": {
        *     "points": [[2, 2], [3.5, 8.1], [3.5, 12.6]],
-       *     "polygonlabels": ["Car"]
+       *     "anglelabels": ["Car"]
        *   }
        * }
-       * @typedef {Object} PolygonRegionResult
+       * @typedef {Object} AngleRegionResult
        * @property {number} original_width width of the original image (px)
        * @property {number} original_height height of the original image (px)
        * @property {number} image_rotation rotation degree of the image (deg)
        * @property {Object} value
-       * @property {number[][]} value.points list of (x, y) coordinates of the polygon by percentage of the image size (0-100)
+       * @property {number[][]} value.points list of (x, y) coordinates of the angle by percentage of the image size (0-100)
        */
 
       /**
-       * @return {PolygonRegionResult}
+       * @return {AngleRegionResult}
        */
       serialize() {
         if (!isFF(FF_DEV_2432) && self.points.length < 3) return null;
@@ -355,14 +357,14 @@ const Model = types
     };
   });
 
-const PolygonRegionModel = types.compose(
-  'PolygonRegionModel',
+const AngleRegionModel = types.compose(
+  'AngleRegionModel',
   RegionsMixin,
   AreaMixin,
   NormalizationMixin,
   KonvaRegionMixin,
   Model,
-  ...(isFF(FF_DEV_3793) ? [] : [PolygonRegionAbsoluteCoordsDEV3793]),
+  ...(isFF(FF_DEV_3793) ? [] : [AngleRegionAbsoluteCoordsDEV3793]),
 );
 
 /**
@@ -410,7 +412,7 @@ function getHoverAnchor({ layer }) {
 }
 
 /**
- * Create new anchor for current polygon
+ * Create new anchor for current angle
  */
 function createHoverAnchor({ point, group, layer, zoom }) {
   const hoverAnchor = new Konva.Circle({
@@ -447,7 +449,7 @@ function removeHoverAnchor({ layer }) {
 
 const Poly = memo(observer(({ item, colors, dragProps, draggable }) => {
   const { flattenedPoints } = item;
-  const name = 'poly';
+  const name = 'angle';
 
   return (
     <Group key={name} name={name}>
@@ -577,7 +579,7 @@ const Edges = memo(observer(({ item, regionStyles }) => {
   );
 }));
 
-const HtxPolygonView = ({ item, setShapeRef }) => {
+const HtxAngleView = ({ item, setShapeRef }) => {
   const { store } = item;
   const { suggestion } = useContext(ImageViewContext) ?? {};
 
@@ -590,7 +592,7 @@ const HtxPolygonView = ({ item, setShapeRef }) => {
     const point = points[idx];
 
     if (!item.closed || (item.closed && item.selected)) {
-      return <PolygonPointView item={point} name={name} key={name} />;
+      return <AnglePointView item={point} name={name} key={name} />;
     }
   }
 
@@ -652,7 +654,7 @@ const HtxPolygonView = ({ item, setShapeRef }) => {
   }, [item.bboxCoords.left, item.bboxCoords.top]);
 
   useEffect(() => {
-    if (isFF(FF_DEV_2432) && !item.closed) item.control.tools.Polygon?.resumeUnfinishedRegion(item);
+    if (isFF(FF_DEV_2432) && !item.closed) item.control.tools.Angle?.resumeUnfinishedRegion(item);
   }, [item.closed]);
 
   if (!item.parent) return null;
@@ -700,7 +702,7 @@ const HtxPolygonView = ({ item, setShapeRef }) => {
       draggable={!item.isReadOnly() && (!item.inSelection || item.parent?.selectedRegions?.length === 1)}
       listening={!suggestion}
     >
-      <LabelOnPolygon item={item} color={regionStyles.strokeColor} />
+      <LabelOnAngle item={item} color={regionStyles.strokeColor} />
 
       {item.mouseOverStartPoint}
 
@@ -711,9 +713,9 @@ const HtxPolygonView = ({ item, setShapeRef }) => {
   );
 };
 
-const HtxPolygon = AliveRegion(HtxPolygonView);
+const HtxAngle = AliveRegion(HtxAngleView);
 
-Registry.addTag('polygonregion', PolygonRegionModel, HtxPolygon);
-Registry.addRegionType(PolygonRegionModel, 'image', value => !!value.points);
+Registry.addTag('angleregion', AngleRegionModel, HtxAngle);
+Registry.addRegionType(AngleRegionModel, 'image', value => !!value.points);
 
-export { PolygonRegionModel, HtxPolygon };
+export { AngleRegionModel, HtxAngle };

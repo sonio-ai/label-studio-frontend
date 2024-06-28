@@ -9,5 +9,7 @@ declare interface LSFResult {
 declare interface LSFRegion {
   results: LSFResult[];
   labelings: any;
+  points: any;
   sonioDistance: any;
+  sonioAngle: any;
 }

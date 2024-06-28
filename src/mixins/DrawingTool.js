@@ -584,6 +584,133 @@ const MultipleClicksDrawingTool = DrawingTool.named('MultipleClicksMixin')
     };
   });
 
+const DoubleLinesDrawingTool = DrawingTool.named('DoubleLinesMixin')
+  .views(() => ({
+    canStart() {
+      return !this.current();
+    },
+  }))
+  .actions(self => {
+    let startPoint = { x: 0, y: 0 };
+    let pointsCount = 0;
+    let lastPoint = { x: -1, y: -1 };
+    let lastEvent = 0;
+    const MOUSE_DOWN_EVENT = 1;
+    const MOUSE_UP_EVENT = 2;
+    const CLICK_EVENT = 3;
+    let lastClickTs = 0;
+    const Super = {
+      canStartDrawing: self.canStartDrawing,
+    };
+
+    return {
+      canStartDrawing() {
+        return Super.canStartDrawing() && !self.annotation.regionStore.hasSelection;
+      },
+      nextPoint(x, y) {
+        const area = self.getCurrentArea();
+        const object = self.obj;
+
+        if (area && object && object.multiImage && area.item_index !== object.currentImage) return;
+
+        self.getCurrentArea().addPoint(x, y);
+        pointsCount++;
+
+        if (self.tagTypes?.controlTagTypes?.includes('angle') && pointsCount >= 4) {
+          self.finishDrawing();
+        }
+      },
+      listenForClose() {
+        console.error('DoubleLinesMixin model needs to implement listenForClose method in actions');
+      },
+      closeCurrent() {
+        console.error('DoubleLinesMixin model needs to implement closeCurrent method in actions');
+      },
+      finishDrawing() {
+        if (!self.isDrawing) return;
+
+        self.annotation.regionStore.selection.drawingUnselect();
+
+        pointsCount = 0;
+        self.closeCurrent();
+        setTimeout(() => {
+          self._finishDrawing();
+        });
+      },
+      cleanupUncloseableShape() {
+        self.deleteRegion();
+        if (self.control.type === self.tagTypes.stateTypes) self.annotation.unselectAll(true);
+        self._resetState();
+      },
+      mousedownEv(ev, [x, y]) {
+        lastPoint = { x, y };
+        lastEvent = MOUSE_DOWN_EVENT;
+      },
+      mouseupEv(ev, [x, y]) {
+        if (lastEvent === MOUSE_DOWN_EVENT && self.comparePointsWithThreshold(lastPoint, { x, y })) {
+          self._clickEv(ev, [x, y]);
+          lastEvent = MOUSE_UP_EVENT;
+        }
+        lastPoint = { x: -1, y: -1 };
+      },
+      clickEv(ev, [x, y]) {
+        if (lastEvent !== MOUSE_UP_EVENT) {
+          self._clickEv(ev, [x, y]);
+        }
+        lastEvent = CLICK_EVENT;
+        lastPoint = { x: -1, y: -1 };
+      },
+      _clickEv(ev, [x, y]) {
+        if (self.current()) {
+          if (pointsCount === 4) {
+            self.finishDrawing();
+            return false;
+          } else if (
+            pointsCount === 1 &&
+            self.comparePointsWithThreshold(startPoint, { x, y }) &&
+            ev.timeStamp - lastClickTs < 350
+          ) {
+            // dblclick
+            self.drawDefault();
+          } else {
+            if (self.comparePointsWithThreshold(startPoint, { x, y })) {
+              if (pointsCount > 2) {
+                self.finishDrawing();
+              }
+            } else {
+              self.nextPoint(x, y);
+            }
+          }
+        } else {
+          if (!self.canStartDrawing()) return;
+          startPoint = { x, y };
+          pointsCount = 1;
+          lastClickTs = ev.timeStamp;
+          self.startDrawing(x, y);
+          self.listenForClose();
+        }
+      },
+
+      drawDefault() {
+        const { x, y } = startPoint;
+        let dX = self.defaultDimensions.length;
+        let dY = self.defaultDimensions.length;
+
+        if (isFF(FF_DEV_3793)) {
+          dX = self.obj.canvasToInternalX(dX);
+          dY = self.obj.canvasToInternalY(dY);
+        }
+
+        self.nextPoint(x + dX, y);
+        self.nextPoint(
+          x + dX / 2,
+          y + Math.sin(Math.PI / 3) * dY,
+        );
+        self.finishDrawing();
+      },
+    };
+  });
+
 const ThreePointsDrawingTool = DrawingTool.named('ThreePointsDrawingTool')
   .views((self) => ({
     canStart() {
@@ -727,4 +854,4 @@ const ThreePointsDrawingTool = DrawingTool.named('ThreePointsDrawingTool')
     };
   });
 
-export { DrawingTool, TwoPointsDrawingTool, MultipleClicksDrawingTool, ThreePointsDrawingTool, LineDrawingTool };
+export { DrawingTool, TwoPointsDrawingTool, MultipleClicksDrawingTool, DoubleLinesDrawingTool, ThreePointsDrawingTool, LineDrawingTool };
