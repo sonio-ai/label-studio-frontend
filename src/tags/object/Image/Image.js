@@ -12,6 +12,7 @@ import { KeyPointRegionModel } from '../../../regions/KeyPointRegion';
 import { PolygonRegionModel } from '../../../regions/PolygonRegion';
 import { RectRegionModel } from '../../../regions/RectRegion';
 import { LineRegionModel } from '../../../regions/LineRegion';
+import { AngleRegionModel } from '../../../regions/AngleRegion';
 import * as Tools from '../../../tools';
 import ToolsManager from '../../../tools/Manager';
 import { parseValue } from '../../../utils/data';
@@ -131,6 +132,7 @@ const TagAttrs = types.model({
 
 const IMAGE_CONSTANTS = {
   lineModel: 'LineModel',
+  angleModel: 'AngleModel',
   rectangleModel: 'RectangleModel',
   rectangleLabelsModel: 'RectangleLabelsModel',
   ellipseModel: 'EllipseModel',
@@ -139,6 +141,7 @@ const IMAGE_CONSTANTS = {
   rectanglelabels: 'rectanglelabels',
   keypointlabels: 'keypointlabels',
   polygonlabels: 'polygonlabels',
+  anglelabels: 'anglelabels',
   brushlabels: 'brushlabels',
   brushModel: 'BrushModel',
   ellipselabels: 'ellipselabels',
@@ -172,6 +175,7 @@ const Model = types.model({
       types.union(
         BrushRegionModel,
         LineRegionModel,
+        AngleRegionModel,
         RectRegionModel,
         EllipseRegionModel,
         PolygonRegionModel,

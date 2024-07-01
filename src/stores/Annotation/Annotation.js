@@ -526,7 +526,7 @@ export const Annotation = types
 
       self.relationStore.deleteNodeRelation(region);
 
-      if (region.type === 'polygonregion') {
+      if (['polygonregion', 'angleregion'].includes(region.type)) {
         detach(region);
       }
 
@@ -549,7 +549,7 @@ export const Annotation = types
         const selectedIds = regionStore.selectedIds;
         const currentRegion = regionStore.findRegion(selectedIds[selectedIds.length - 1] ?? regionStore.regions[regionStore.regions.length - 1]?.id);
 
-        if (currentRegion?.type === 'polygonregion') {
+        if (['polygonregion', 'angleregion'].includes(currentRegion?.type)) {
           const points = currentRegion?.points?.length ?? 0;
 
           stopDrawingAfterNextUndo = points <= 1;

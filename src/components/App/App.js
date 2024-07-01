@@ -48,7 +48,6 @@ import { SidebarTabs } from '../SidebarTabs/SidebarTabs';
 import { SidePanels } from '../SidePanels/SidePanels';
 import { SideTabsPanels } from '../SidePanels/TabPanels/SideTabsPanels';
 import { TopBar } from '../TopBar/TopBar';
-import TaskContext from '../../core/taskContext';
 
 /**
  * Styles
@@ -232,7 +231,6 @@ class App extends Component {
         ref={isFF(FF_LSDV_4620_3_ML) ? reactCleaner(this) : null}
       >
         <Settings store={store} />
-        <TaskContext.Provider value={store.task}>
           <Provider store={store}>
             {newUIEnabled ? (
               <InstructionsModal
@@ -302,7 +300,6 @@ class App extends Component {
               )}
             </Block>
           </Provider>
-        </TaskContext.Provider>
         {store.hasInterface('debug') && <Debug store={store} />}
       </Block>
     );

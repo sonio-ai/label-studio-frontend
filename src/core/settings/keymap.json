@@ -65,6 +65,16 @@
     "mac": "command+shift+z",
     "description": "Redo"
   },
+  "angle:undo": {
+    "key": "ctrl+z",
+    "mac": "command+z",
+    "description": "Undo"
+  },
+  "angle:redo": {
+    "key": "ctrl+shift+z",
+    "mac": "command+shift+z",
+    "description": "Redo"
+  },
   "region:delete-all": {
     "key": "ctrl+backspace",
     "mac": "command+backspace",

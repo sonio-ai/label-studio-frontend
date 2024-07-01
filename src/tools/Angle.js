@@ -2,15 +2,15 @@ import { isAlive, types } from 'mobx-state-tree';
 
 import BaseTool, { DEFAULT_DIMENSIONS } from './Base';
 import ToolMixin from '../mixins/Tool';
-import { MultipleClicksDrawingTool } from '../mixins/DrawingTool';
+import { DoubleLinesDrawingTool } from '../mixins/DrawingTool';
 import { NodeViews } from '../components/Node/Node';
 import { observe } from 'mobx';
 import { FF_DEV_2432, isFF } from '../utils/feature-flags';
 
 const _Tool = types
-  .model('PolygonTool', {
+  .model('AngleTool', {
     group: 'segmentation',
-    shortcut: 'P',
+    shortcut: 'A',
   })
   .views(self => {
     const Super = {
@@ -20,9 +20,9 @@ const _Tool = types
     };
 
     return {
-      get getActivePolygon() {
+      get getActiveAngle() {
         const poly = self.currentArea;
-
+        
         if (isFF(FF_DEV_2432) && poly && !isAlive(poly)) return null;
         if (poly && poly.closed) return null;
         if (poly === undefined) return null;
@@ -33,22 +33,22 @@ const _Tool = types
 
       get tagTypes() {
         return {
-          stateTypes: 'polygonlabels',
-          controlTagTypes: ['polygonlabels', 'polygon'],
+          stateTypes: 'anglelabels',
+          controlTagTypes: ['anglelabels', 'angle'],
         };
       },
 
       get viewTooltip() {
-        return 'Polygon region';
+        return 'Angle';
       },
       get iconComponent() {
         return self.dynamic
-          ? NodeViews.PolygonRegionModel.altIcon
-          : NodeViews.PolygonRegionModel.icon;
+          ? NodeViews.AngleRegionModel.altIcon
+          : NodeViews.AngleRegionModel.icon;
       },
 
       get defaultDimensions() {
-        return DEFAULT_DIMENSIONS.polygon;
+        return DEFAULT_DIMENSIONS.angle;
       },
 
       createRegionOptions({ x, y }) {
@@ -70,8 +70,7 @@ const _Tool = types
       },
 
       current() {
-        console.log('poly current', self.getActivePolygon);
-        return self.getActivePolygon;
+        return self.getActiveAngle;
       },
     };
   })
@@ -161,6 +160,6 @@ const _Tool = types
     };
   });
 
-const Polygon = types.compose(_Tool.name, ToolMixin, BaseTool, MultipleClicksDrawingTool, _Tool);
+const Angle = types.compose(_Tool.name, ToolMixin, BaseTool, DoubleLinesDrawingTool, _Tool);
 
-export { Polygon };
+export { Angle };

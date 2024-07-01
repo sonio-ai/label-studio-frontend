@@ -76,6 +76,7 @@ const Model = types.model({
     'Labels',
     'EllipseLabels',
     'RectangleLabels',
+    'AngleLabels',
     'PolygonLabels',
     'KeyPointLabels',
     'BrushLabels',

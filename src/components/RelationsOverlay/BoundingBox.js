@@ -98,6 +98,7 @@ const _detect = region => {
     }
     case 'rectangleregion':
     case 'lineregion':
+    case 'angleregion':
     case 'ellipseregion':
     case 'polygonregion':
     case 'keypointregion':

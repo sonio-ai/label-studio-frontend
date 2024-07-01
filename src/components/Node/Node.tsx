@@ -10,7 +10,7 @@ import {
 
 import './Node.styl';
 import { Block, Elem } from '../../utils/bem';
-import { IconBrushTool, IconBrushToolSmart, IconCircleTool, IconCircleToolSmart, IconKeypointsTool, IconKeypointsToolSmart, IconPolygonTool, IconPolygonToolSmart, IconRectangle3PointTool, IconRectangle3PointToolSmart, IconRectangleTool, IconLineTool, IconRectangleToolSmart, IconText, IconWarning } from '../../assets/icons';
+import { IconBrushTool, IconBrushToolSmart, IconCircleTool, IconCircleToolSmart, IconKeypointsTool, IconKeypointsToolSmart, IconPolygonTool, IconPolygonToolSmart, IconRectangle3PointTool, IconRectangle3PointToolSmart, IconRectangleTool, IconLineTool, IconAngleTool, IconRectangleToolSmart, IconText, IconWarning } from '../../assets/icons';
 import { NodeView } from './NodeView';
 import { Tooltip } from '../../common/Tooltip/Tooltip';
 
@@ -55,6 +55,11 @@ const NodeViews = {
     name: 'Line',
     icon: IconLineTool,
     altIcon: IconLineTool,
+  }),
+ 
+  AngleRegionModel: NodeView({
+    name: 'Angle',
+    icon: IconAngleTool,
   }),
  
   RectRegionModel: NodeView({

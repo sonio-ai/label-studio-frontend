@@ -38,6 +38,7 @@ const Result = types
       'paragraphlabels',
       'rectangle',
       'line',
+      'angle',
       'keypoint',
       'polygon',
       'brush',
@@ -46,6 +47,7 @@ const Result = types
       'rectanglelabels',
       'keypointlabels',
       'polygonlabels',
+      'anglelabels',
       'brushlabels',
       'ellipselabels',
       'timeserieslabels',
@@ -77,6 +79,7 @@ const Result = types
       paragraphlabels: types.maybe(types.array(types.string)),
       rectanglelabels: types.maybe(types.array(types.string)),
       keypointlabels: types.maybe(types.array(types.string)),
+      anglelabels: types.maybe(types.array(types.string)),
       polygonlabels: types.maybe(types.array(types.string)),
       ellipselabels: types.maybe(types.array(types.string)),
       brushlabels: types.maybe(types.array(types.string)),
@@ -338,7 +341,7 @@ const Result = types
 
       self.annotation.relationStore.deleteNodeRelation(self);
 
-      if (self.type === 'polygonregion') {
+      if (['polygonregion', 'angleregion'].includes(self.type)) {
         self.destroyRegion();
       }
 

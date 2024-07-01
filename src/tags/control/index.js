@@ -26,6 +26,8 @@ import { PolygonModel } from './Polygon';
 import { RectangleLabelsModel } from './RectangleLabels';
 import { RectangleModel } from './Rectangle';
 import { LineModel } from './Line';
+import { AngleLabelsModel } from './AngleLabels';
+import { AngleModel } from './Angle';
 
 import { RelationsModel } from './Relations';
 import { RelationModel } from './Relation';
@@ -57,6 +59,8 @@ export {
   RectangleLabelsModel,
   RectangleModel,
   LineModel,
+  AngleLabelsModel,
+  AngleModel,
   RelationsModel,
   RelationModel,
 };

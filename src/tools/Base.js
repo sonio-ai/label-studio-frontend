@@ -103,6 +103,7 @@ export const MIN_SIZE = { X: 3, Y: 3 };
 export const DEFAULT_DIMENSIONS = {
   rect: { width: 30, height: 30 },
   line: { width: 30, height: 30 },
+  angle: { width: 30, height: 30 },
   ellipse: { radius: 30 },
   polygon: { length: 30 },
 };

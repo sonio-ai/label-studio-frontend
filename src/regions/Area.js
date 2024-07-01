@@ -15,6 +15,7 @@ import { TimeSeriesRegionModel } from './TimeSeriesRegion';
 import { ParagraphsRegionModel } from './ParagraphsRegion';
 import { VideoRectangleRegionModel } from './VideoRectangleRegion';
 import { LineRegionModel } from './LineRegion';
+import { AngleRegionModel } from './AngleRegion';
 
 // general Area type for classification Results which doesn't belong to any real Area
 const ClassificationArea = types.compose(
@@ -67,6 +68,7 @@ const Area = types.union(
   TimeSeriesRegionModel,
   RectRegionModel,
   LineRegionModel,
+  AngleRegionModel,
   RichTextRegionModel,
   KeyPointRegionModel,
   EllipseRegionModel,
