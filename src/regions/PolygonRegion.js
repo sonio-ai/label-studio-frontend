@@ -210,7 +210,6 @@ const Model = types
       },
 
       addPoint(x, y) {
-        console.log('poly', 'addpoint');
         if (self.closed) return;
 
         const point = self.control?.getSnappedPoint({ x, y });
@@ -500,6 +499,66 @@ const Poly = memo(observer(({ item, colors, dragProps, draggable }) => {
   );
 }));
 
+const AnglePoly = memo(observer(({ item, colors, dragProps, draggable }) => {
+  const { flattenedPoints } = item;
+  const name = 'poly';
+
+  const lines = [flattenedPoints.slice(0, 4), flattenedPoints.slice(4)];
+
+  return (
+    <Group key={name} name={name}>{
+      lines.map(line => (
+          <Line
+            name="_transformable"
+            lineJoin="round"
+            lineCap="square"
+            stroke="#f48a42"
+            strokeWidth="4"
+            strokeScaleEnabled={false}
+            perfectDrawEnabled={false}
+            shadowForStrokeEnabled={false}
+            points={line}
+            fill={colors.fillColor}
+            closed={false}
+            {...dragProps}
+            onTransformEnd={e => {
+              if (e.target !== e.currentTarget) return;
+
+              const t = e.target;
+
+              const d = [t.getAttr('x', 0), t.getAttr('y', 0)];
+              const scale = [t.getAttr('scaleX', 1), t.getAttr('scaleY', 1)];
+              const points = t.getAttr('points');
+
+              item.setPoints(
+                points.reduce((result, coord, idx) => {
+                  const isXCoord = idx % 2 === 0;
+
+                  if (isXCoord) {
+                    const point = item.control?.getSnappedPoint({
+                      x: item.parent.canvasToInternalX(coord * scale[0] + d[0]),
+                      y: item.parent.canvasToInternalY(points[idx + 1] * scale[1] + d[1]),
+                    });
+
+                    result.push(point.x, point.y);
+                  }
+                  return result;
+                }, []),
+              );
+
+              t.setAttr('x', 0);
+              t.setAttr('y', 0);
+              t.setAttr('scaleX', 1);
+              t.setAttr('scaleY', 1);
+            }}
+            draggable={draggable}
+          />
+        ))
+      }
+    </Group>
+  );
+}));
+
 /**
  * Line between 2 points
  */
@@ -510,10 +569,12 @@ const Edge = observer(({ name, item, idx, p1, p2, closed, regionStyles }) => {
   const lineProps = closed ? {
     stroke: 'transparent',
     strokeWidth: regionStyles.strokeWidth,
+    strokeColor: regionStyles.strokeColor,
     strokeScaleEnabled: false,
   } : {
     stroke: regionStyles.strokeColor,
     strokeWidth: regionStyles.strokeWidth,
+    strokeColor: regionStyles.strokeColor,
     strokeScaleEnabled: false,
   };
 
@@ -573,6 +634,49 @@ const Edges = memo(observer(({ item, regionStyles }) => {
           />
         );
       })}
+    </Group>
+  );
+}));
+
+const AngleEdges = memo(observer(({ item, regionStyles }) => {
+  const { points,closed } = item;
+  const name = 'borders';
+
+  if (item.closed && (item.parent.useTransformer || !item.selected)) {
+    return null;
+  }
+
+  const lines = [points.slice(0,2), points.slice(2)];
+
+  return (
+    <Group key={name} name={name}>
+      {lines.map(line => (
+        line.map((p, idx) => {
+          const idx1 = idx;
+          const idx2 = idx === line.length - 1 ? 0 : idx + 1;
+
+          if (!closed && idx2 === 0) {
+            return null;
+          }
+
+          return (
+            <Edge
+              key={`border_${idx1}_${idx2}`}
+              name={`border_${idx1}_${idx2}`}
+              item={item}
+              idx={idx1}
+              p1={line[idx]}
+              p2={line[idx2]}
+              closed={closed}
+              regionStyles={{
+                ...regionStyles,
+                strokeColor: "#f48a42",
+                strokeWidth: "4",
+              }}
+            />
+          );
+        })
+      ))}
     </Group>
   );
 }));
@@ -704,8 +808,10 @@ const HtxPolygonView = ({ item, setShapeRef }) => {
 
       {item.mouseOverStartPoint}
 
-      {item.points && item.closed ? <Poly item={item} colors={regionStyles} dragProps={dragProps} draggable={!item.isReadOnly() && item.inSelection && item.parent?.selectedRegions?.length > 1}/> : null}
-      {(item.points && !item.isReadOnly()) ? <Edges item={item} regionStyles={regionStyles}/> : null}
+      {item.points?.length > 8 && item.closed ? <Poly item={item} colors={regionStyles} dragProps={dragProps} draggable={!item.isReadOnly() && item.inSelection && item.parent?.selectedRegions?.length > 1}/> : null}
+      {item.points?.length <= 8 && item.closed ? <AnglePoly item={item} colors={regionStyles} dragProps={dragProps} draggable={!item.isReadOnly() && item.inSelection && item.parent?.selectedRegions?.length > 1}/> : null}
+      {(item.points?.length > 8 && !item.isReadOnly()) ? <Edges item={item} regionStyles={regionStyles}/> : null}
+      {(item.points?.length <= 8 && !item.isReadOnly()) ? <AngleEdges item={item} regionStyles={regionStyles}/> : null}
       {(item.points && !item.isReadOnly()) ? renderCircles(item.points) : null}
     </Group>
   );

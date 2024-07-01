@@ -39,7 +39,7 @@ const _Tool = types
       },
 
       get viewTooltip() {
-        return 'Angle region';
+        return 'Angle';
       },
       get iconComponent() {
         return self.dynamic

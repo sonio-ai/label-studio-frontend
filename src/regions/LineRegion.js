@@ -159,8 +159,6 @@ const Model = types
       const canvasX = self.parent.internalToCanvasX(x);
       const canvasY = self.parent.internalToCanvasY(y);
 
-      console.log('draw', x, y, points);
-
       if (points.length === 1) {
         const canvasWidth = self.getDistanceBetweenPoints(
           { x: canvasX, y: canvasY },
@@ -351,7 +349,6 @@ const HtxLineView = ({ item, setShapeRef }) => {
     };
 
     eventHandlers.onDragStart = (e) => {
-      console.log('onDragStart');
       if (item.parent.getSkipInteractions()) {
         e.currentTarget.stopDrag(e.evt);
         return;
@@ -443,7 +440,6 @@ const HtxLine = AliveRegion(HtxLineView);
 
 Registry.addTag('lineregion', LineRegionModel, HtxLine);
 Registry.addRegionType(LineRegionModel, 'image', (value) => {
-  console.log('--------------------------------------------', value);
   return typeof value.x2 !== 'undefined';
   // return value;
 });
